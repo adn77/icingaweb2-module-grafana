@@ -34,7 +34,7 @@ trait IcingaDbGrapher
     protected $auth;
     protected $authentication;
     protected $grafanaHost = null;
-    protected $grafanaTheme = 'light';
+    protected $grafanaTheme = null;
     protected $protocol = "http";
     protected $usePublic = "no";
     protected $publicHost = null;
@@ -68,6 +68,12 @@ trait IcingaDbGrapher
     protected $grafanaVersion = "0";
     protected $defaultdashboarduid;
     protected $object;
+    protected $permission;
+    protected $dashboard;
+    protected $dashboarduid;
+    protected $panelId;
+    protected $orgId;
+    protected $customVars;
 
     protected function init()
     {
@@ -114,7 +120,7 @@ trait IcingaDbGrapher
             $this->defaultDashboardPanelId
         );
         $this->defaultOrgId = $this->config->get('defaultorgid', $this->defaultOrgId);
-        $this->grafanaTheme = $this->config->get('theme', $this->grafanaTheme);
+        $this->grafanaTheme = Auth::getInstance()->getUser()->getPreferences()->getValue('icingaweb', 'theme_mode', 'dark');
         $this->height = $this->config->get('height', $this->height);
         $this->width = $this->config->get('width', $this->width);
 
@@ -236,7 +242,7 @@ trait IcingaDbGrapher
             $this->timerange = Url::fromRequest()->hasParam('timerange') ?
                 'now-' . urldecode(Url::fromRequest()->getParam('timerange')) :
                 'now-' . $this->getGraphConfigOption($serviceName, 'timerange', $this->timerange);
-            $this->timerangeto = strpos($this->timerange, '/') ? $this->timerange : $this->timerangeto;
+            $this->timerangeto = strpos($this->timerange ?? '', '/') ? $this->timerange : $this->timerangeto;
         }
 
         $this->height = $this->getGraphConfigOption($serviceName, 'height', $this->height);
@@ -325,8 +331,9 @@ trait IcingaDbGrapher
                 [
                     "src" => $iFramesrc,
                     "alt" => rawurlencode($serviceName),
+                    "width" => "100%",
                     "height" => $this->height,
-                    "style" => "width: 100%; border: none;"
+                    "style" => "border: none;"
                 ]
             );
 
@@ -483,9 +490,16 @@ trait IcingaDbGrapher
                     $this->panelId
                 );
 
-                $link = new Link($previewHtml, $url, ["target" => "_blank"]);
-
-                $html->add($link);
+                //$link = new Link($previewHtml, $url, ["target" => "_blank"]);
+                //$html->add($link);
+                if ($this->accessMode !== "iframe") {
+                    $link = new Link($previewHtml, $url, ["target" => "_blank"]);
+                    $html->add($link);
+                } else {
+                    $link = new Link(" => see in Grafana", $url, ["target" => "_blank"]);
+                    $html->add($link);
+                    $html->addHtml($previewHtml);
+                };
             }
 
             $return_html->add($html);

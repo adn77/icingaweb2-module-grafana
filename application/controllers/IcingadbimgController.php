@@ -12,6 +12,7 @@ use Icinga\Exception\NotFoundError;
 use Icinga\Module\Grafana\Web\Controller\IcingadbGrafanaController;
 use Icinga\Application\Config;
 use Icinga\Exception\ConfigurationError;
+use Icinga\Authentication\Auth;
 use Icinga\Module\Grafana\Helpers\Util;
 use Icinga\Module\Icingadb\Model\CustomvarFlat;
 use Icinga\Module\Icingadb\Model\Host;
@@ -29,7 +30,7 @@ class IcingadbimgController extends IcingadbGrafanaController
     protected $myAuth;
     protected $authentication;
     protected $grafanaHost             = null;
-    protected $grafanaTheme            = 'light';
+    protected $grafanaTheme            = null;
     protected $protocol                = "http";
     protected $username                = null;
     protected $password                = null;
@@ -66,7 +67,7 @@ class IcingadbimgController extends IcingadbGrafanaController
         if ($this->hasParam('timerangeto')) {
             $this->timerangeto = urldecode($this->getParam('timerangeto'));
         } else {
-            $this->timerangeto = strpos($this->timerange, '/') ? 'now-' . $this->timerange : "now";
+            $this->timerangeto = strpos($this->timerange ?? '', '/') ? 'now-' . $this->timerange ?? '' : "now";
         }
         $this->cacheTime = $this->hasParam('cachetime') ? $this->getParam('cachetime') : 300;
 
@@ -92,7 +93,7 @@ class IcingadbimgController extends IcingadbGrafanaController
             $this->defaultDashboardPanelId
         );
         $this->defaultOrgId = $this->myConfig->get('defaultorgid', $this->defaultOrgId);
-        $this->grafanaTheme = $this->myConfig->get('theme', $this->grafanaTheme);
+        $this->grafanaTheme = grafanaTheme = Auth::getInstance()->getUser()->getPreferences()->getValue('icingaweb', 'theme_mode', 'dark');
         $this->defaultDashboardStore = $this->myConfig->get('defaultdashboardstore', $this->defaultDashboardStore);
         $this->height = $this->myConfig->get('height', $this->height);
         $this->width = $this->myConfig->get('width', $this->width);
