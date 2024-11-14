@@ -51,6 +51,14 @@ class IcingadbimgController extends IcingadbGrafanaController
     protected $defaultdashboarduid;
     protected $refresh                 = "yes";
 
+    protected $themeMap = array (
+                        'dark'           => "dark",
+                        'light'          => "light",
+                        'system'         => "light",
+                        'Winter'         => "dark",
+                        'colorblind'     => "dark",
+                        'high-contrast'  => "dark"
+                       );
 
     public function init()
     {
@@ -93,7 +101,7 @@ class IcingadbimgController extends IcingadbGrafanaController
             $this->defaultDashboardPanelId
         );
         $this->defaultOrgId = $this->myConfig->get('defaultorgid', $this->defaultOrgId);
-        $this->grafanaTheme = grafanaTheme = Auth::getInstance()->getUser()->getPreferences()->getValue('icingaweb', 'theme_mode', 'dark');
+        $this->grafanaTheme = $this->grafanaTheme = $this->themeMap[Auth::getInstance()->getUser()->getPreferences()->getValue('icingaweb', 'theme_mode', Auth::getInstance()->getUser()->getPreferences()->getValue('icingaweb', 'theme', 'dark'))];
         $this->defaultDashboardStore = $this->myConfig->get('defaultdashboardstore', $this->defaultDashboardStore);
         $this->height = $this->myConfig->get('height', $this->height);
         $this->width = $this->myConfig->get('width', $this->width);

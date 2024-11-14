@@ -75,6 +75,15 @@ trait IcingaDbGrapher
     protected $orgId;
     protected $customVars;
 
+    protected $themeMap = array (
+                        'dark'           => "dark",
+                        'light'          => "light",
+                        'system'         => "light",
+                        'Winter'         => "dark",
+                        'colorblind'     => "dark",
+                        'high-contrast'  => "light"
+                       );
+
     protected function init()
     {
         $this->title = Html::tag("h2", "Performance Graph");
@@ -120,7 +129,7 @@ trait IcingaDbGrapher
             $this->defaultDashboardPanelId
         );
         $this->defaultOrgId = $this->config->get('defaultorgid', $this->defaultOrgId);
-        $this->grafanaTheme = Auth::getInstance()->getUser()->getPreferences()->getValue('icingaweb', 'theme_mode', 'dark');
+        $this->grafanaTheme = $this->grafanaTheme = $this->themeMap[Auth::getInstance()->getUser()->getPreferences()->getValue('icingaweb', 'theme_mode', Auth::getInstance()->getUser()->getPreferences()->getValue('icingaweb', 'theme', 'dark'))];
         $this->height = $this->config->get('height', $this->height);
         $this->width = $this->config->get('width', $this->width);
 
